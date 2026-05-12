@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Valley CFO — QuickBooks Authorization</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 640px;
+    margin: 60px auto;
+    padding: 24px;
+    color: #222;
+    background: #f9f9f7;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e6e6e0;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .accent {
+    width: 48px;
+    height: 4px;
+    background: #d9c565;
+    margin-bottom: 24px;
+  }
+  h1 {
+    color: #01404F;
+    font-size: 22px;
+    margin: 0 0 8px;
+  }
+  .subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .url-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .url-box {
+    background: #f4f4f0;
+    border: 1px solid #e6e6e0;
+    padding: 14px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    word-break: break-all;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+  .btn {
+    background: #01404F;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .btn:hover { background: #023540; }
+  .btn:active { background: #012a33; }
+  .btn-state {
+    font-size: 13px;
+    color: #2c7e5c;
+    margin-left: 10px;
+    display: none;
+  }
+  .btn-state.show { display: inline; }
+  .error {
+    background: #fdf2f2;
+    border: 1px solid #f5c7c7;
+    color: #b33a3a;
+    padding: 16px;
+    border-radius: 4px;
+    margin-top: 16px;
+  }
+  .footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="accent"></div>
+  <h1 id="title">QuickBooks authorization received</h1>
+  <div class="subtitle" id="subtitle">Copy the URL below and paste it into the Valley CFO onboarding terminal to complete the connection.</div>
+
+  <div class="url-label">Authorization URL</div>
+  <div class="url-box" id="url"></div>
+
+  <button class="btn" id="copyBtn" onclick="copyUrl()">Copy URL</button>
+  <span class="btn-state" id="copyState">Copied to clipboard</span>
+
+  <div id="errorBox" class="error" style="display:none;"></div>
+
+  <div class="footer">Valley CFO Inc. &mdash; akraft@valleytaxes.com</div>
+</div>
+
+<script>
+  (function() {
+    var url = window.location.href;
+    var params = new URLSearchParams(window.location.search);
+    var hasCode = params.has('code') && params.has('realmId');
+    var hasError = params.has('error');
+
+    document.getElementById('url').textContent = url;
+
+    if (hasError) {
+      document.getElementById('title').textContent = 'Authorization failed';
+      document.getElementById('subtitle').textContent = 'QuickBooks returned an error. Contact Aaron Kraft with the URL below.';
+      document.getElementById('errorBox').style.display = 'block';
+      document.getElementById('errorBox').textContent =
+        'Error: ' + (params.get('error_description') || params.get('error'));
+    } else if (!hasCode) {
+      document.getElementById('title').textContent = 'No authorization parameters found';
+      document.getElementById('subtitle').textContent = 'This page should only be reached after authorizing in QuickBooks. If you got here directly, return to the onboarding script and try again.';
+      document.getElementById('copyBtn').style.display = 'none';
+    }
+  })();
+
+  function copyUrl() {
+    var url = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function() {
+        document.getElementById('copyState').classList.add('show');
+        setTimeout(function() {
+          document.getElementById('copyState').classList.remove('show');
+        }, 2500);
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      document.getElementById('copyState').classList.add('show');
+    }
+  }
+</script>
+</body>
+</html>
